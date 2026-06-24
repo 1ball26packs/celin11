@@ -34,7 +34,7 @@
         @keyframes fall { from { transform: translateY(-10vh) rotate(0deg); } to { transform: translateY(110vh) rotate(360deg); } }
 
         #game-container {
-            width: 80%; max-width: 600px; min-height: 100vh;
+            width: 90%; max-width: 600px; min-height: 90vh;
             display: flex; flex-direction: column; justify-content: center;
             align-items: center; padding: 20px; box-sizing: border-box;
            z-index: 2;
@@ -51,12 +51,10 @@
         .image-wrapper {
            position: relative;
     margin-bottom: 25px;
-    width: 90%;
-    max-width: 300px;
+    width: 90%;
     /* border: 4px solid var(--neon-pink); */
     box-shadow: 6px 6px 0px #0c0c0c26;
-    aspect-ratio: 1 / 1;
-    background: #000;
+    aspect-ratio: 1 / 1;
     animation: float 3s ease-in-out infinite;
         }
         @keyframes float { 0%, 100% { transform: translateY(0px) rotate(-2deg); } 50% { transform: translateY(-15px) rotate(2deg); } }
