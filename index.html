@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level 11: Gracelin's Quest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --neon-pink: #f92672;
+            --neon-cyan: #66d9ef;
+            --neon-yellow: #e6db74;
+            --text-color: #f8f8f2;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; min-height: 100vh;
+            background-color: var(--bg-color);
+            background-image: url('img/wp.png');
+            background-size: cover;
+            background-position: center;
+            animation: bgMove 20s ease-in-out infinite alternate;
+            color: var(--text-color);
+            font-family: 'Press Start 2P', cursive;
+            overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        @keyframes bgMove { from { background-position: center 0%; } to { background-position: center 100%; } }
+
+        /* Efek Daun Berjatuhan */
+        .leaf { position: absolute; color: var(--neon-cyan); opacity: 0.5; animation: fall linear infinite; pointer-events: none; z-index: 1; }
+        @keyframes fall { from { transform: translateY(-10vh) rotate(0deg); } to { transform: translateY(110vh) rotate(360deg); } }
+
+        #game-container {
+            width: 100%; max-width: 600px; min-height: 100vh;
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; padding: 20px; box-sizing: border-box;
+           z-index: 2;
+        }
+
+        /* Animasi Transisi & Layar */
+        .screen { display: none; flex-direction: column; align-items: center; width: 100%; }
+        .active { display: flex; animation: slideIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { font-size: 1.5rem; color: var(--neon-yellow); text-shadow: 3px 3px var(--neon-pink); text-align: center; margin-bottom: 30px; animation: float 3s ease-in-out infinite;}
+        
+        /* Foto Gerak Lucu */
+        .image-wrapper {
+           position: relative;
+    margin-bottom: 25px;
+    width: 90%;
+    max-width: 300px;
+    /* border: 4px solid var(--neon-pink); */
+    box-shadow: 6px 6px 0px #0c0c0c26;
+    aspect-ratio: 1 / 1;
+    background: #000;
+    animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0px) rotate(-2deg); } 50% { transform: translateY(-15px) rotate(2deg); } }
+
+        .media-content { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.3) sepia(0.4) saturate(1.2) hue-rotate(-10deg); }
+        .image-wrapper::after { content: ""; position: absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2)); background-size: 100% 4px; pointer-events: none; }
+
+        .text-box {
+            background: rgba(0, 0, 0, 0.8); border: 2px solid var(--text-color);
+            border-radius: 5px; padding: 15px; width: 100%; max-width: 500px;
+            height: 140px; display: flex; justify-content: center; align-items: center;
+            overflow-y: auto; text-align: center; font-size: 0.9rem; line-height: 1.8;
+        }
+
+        button {
+            background: #000; border: 3px solid var(--neon-cyan); color: var(--neon-cyan);
+            padding: 15px 20px; font-family: 'Press Start 2P', cursive; cursor: pointer;
+            margin-top: 25px; box-shadow: 4px 4px 0px var(--neon-pink); text-transform: uppercase;
+        }
+        button:hover { background: var(--neon-cyan); color: #000; transform: scale(1.05); }
+
+        #final-screen h1 { font-size: 1.8rem; line-height: 1.6; color: var(--neon-yellow); text-shadow: 4px 4px var(--neon-pink); }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop><source src="https://assets.mixkit.co/music/preview/mixkit-8-bit-adventure-background-2083.mp3" type="audio/mpeg"></audio>
+
+    <div id="game-container">
+        <div id="start-screen" class="screen active">
+            <h1>GRACELIN'S<br>EPIC QUEST</h1>
+            <button onclick="startGame()">PRESS START</button>
+        </div>
+
+        <div id="story-screen" class="screen">
+            <h2 id="story-title" style="color: #ffffff;text-shadow: 2px 2px black;padding-bottom: 20px;"></h2>
+            <div class="image-wrapper" id="media-wrapper"></div>
+            <div class="text-box"><span id="typewriter-text"></span></div>
+            <button id="next-btn" onclick="nextPage()">NEXT ⏭</button>
+        </div>
+
+        <div id="final-screen" class="screen">
+            <h1>HAPPY 11th BIRTHDAY<br>GRACELIN MELODIA ADINEGARA</h1>
+            <button onclick="location.reload()">REPLAY QUEST</button>
+        </div>
+    </div>
+
+    <script>
+        const storyData = [
+            { title: "The Hero Appears", paragraphs: ["Long ago, eleven years ago, a wonderful hero entered the world.", "Her name was Gracelin Melodia.", "She arrived with a bright smile, a curious mind, and a heart ready for adventure."], mediaSrc: "img/1.jpg" },
+            { title: "Forest of Imagination", paragraphs: ["As Celin grew, she discovered a magical gift.", "She loved drawing.", "Every blank page became a new kingdom."], mediaSrc: "img/2.jpg" },
+            { title: "Arcade Caverns", paragraphs: ["Beyond art, another adventure awaited.", "Games.", "Each challenge sharpened her thinking."], mediaSrc: "img/3.jpg" },
+            { title: "Academy Kingdom", paragraphs: ["In the Kingdom of Learning, Celin gained experience quickly.", "She studies diligently.", "She learns eagerly."], mediaSrc: "img/4.jpg" },
+            { title: "Temple of Faith", paragraphs: ["One of the greatest treasures in her life is her faith.", "Through Sunday School and God's Word, she grows in wisdom."], mediaSrc: "img/5.jpg" },
+            { title: "The Present Age", paragraphs: ["Today, Celin reaches Level 11.", "Creative.", "Smart.", "Kind.", "Faithful."], mediaSrc: "img/6.jpg" },
+            { title: "The Future Map", paragraphs: ["Ahead lies a world full of possibilities.", "Artist.", "Teacher.", "Designer.", "Only God knows the map of the adventure."], mediaSrc: "img/7.jpg" },
+            { title: "Final Blessing", paragraphs: ["Happy 11th Birthday, Gracelin Melodia.", "May God guide every step.", "QUEST COMPLETE.", "🏆 LEVEL 11 UNLOCKED 🏆"], mediaSrc: "img/8.jpg" }
+        ];
+
+        let currentPage = 0; let currentPara = 0; let isTyping = false; let typeTimeout;
+
+        function startGame() {
+            document.getElementById('bgMusic').play().catch(() => {});
+            document.getElementById('start-screen').classList.remove('active');
+            document.getElementById('story-screen').classList.add('active');
+            loadPage();
+        }
+
+        setInterval(() => {
+            const leaf = document.createElement('div');
+            leaf.innerHTML = '🍃'; leaf.className = 'leaf';
+            leaf.style.left = Math.random() * 100 + 'vw';
+            leaf.style.animationDuration = Math.random() * 5 + 5 + 's';
+            document.body.appendChild(leaf);
+            setTimeout(() => leaf.remove(), 10000);
+        }, 1000);
+
+        function loadPage() {
+            const data = storyData[currentPage];
+            document.getElementById('story-title').innerText = data.title;
+            document.getElementById('media-wrapper').innerHTML = `<img class="media-content" src="${data.mediaSrc}">`;
+            currentPara = 0;
+            typeText(data.paragraphs[0]);
+        }
+
+        function typeText(text) {
+            isTyping = true;
+            let i = 0;
+            const el = document.getElementById('typewriter-text');
+            el.innerHTML = '';
+            function type() {
+                if (i < text.length) { el.innerHTML += text.charAt(i); i++; typeTimeout = setTimeout(type, 30); }
+                else isTyping = false;
+            }
+            type();
+        }
+
+        function nextPage() {
+            if (isTyping) { clearTimeout(typeTimeout); document.getElementById('typewriter-text').innerHTML = storyData[currentPage].paragraphs[currentPara]; isTyping = false; return; }
+            if (currentPara < storyData[currentPage].paragraphs.length - 1) {
+                currentPara++; typeText(storyData[currentPage].paragraphs[currentPara]);
+            } else {
+                currentPage++;
+                if (currentPage < storyData.length) {
+                    document.getElementById('story-screen').classList.remove('active');
+                    setTimeout(() => { document.getElementById('story-screen').classList.add('active'); loadPage(); }, 500);
+                } else { document.getElementById('story-screen').classList.remove('active'); document.getElementById('final-screen').classList.add('active'); }
+            }
+        }
+    </script>
+</body>
+</html>
